@@ -17,6 +17,7 @@ from app.schemas.base import UserCreate
 from app.schemas.calculation import CalculationCreate, CalculationRead
 from app.schemas.user import Token, UserLogin, UserResponse
 from app.operations import add, divide, multiply, subtract
+from app.auth.dependencies import get_current_user
 import logging
 import uvicorn
 
@@ -111,21 +112,35 @@ def login_user(credentials: UserLogin, db: Session = Depends(get_db)):
     return auth_result
 
 @app.get("/calculations", response_model=List[CalculationRead])
-def browse_calculations(db: Session = Depends(get_db)):
-    calculations = db.query(Calculation).all()
+def browse_calculations(
+    db: Session = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    calculations = db.query(Calculation).filter(Calculation.user_id == current_user.id).all()
     return calculations
 
 @app.get("/calculations/{calculation_id}", response_model=CalculationRead)
-def read_calculation(calculation_id: str, db: Session = Depends(get_db)):
-    calculation = db.get(Calculation, calculation_id)
+def read_calculation(
+    calculation_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    calculation = db.query(Calculation).filter(
+        Calculation.id == calculation_id,
+        Calculation.user_id == current_user.id
+    ).first()
     if not calculation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Calculation not found")
     return calculation
 
 @app.post("/calculations", response_model=CalculationRead, status_code=status.HTTP_201_CREATED)
-def create_calculation(calc: CalculationCreate, db: Session = Depends(get_db)):
+def create_calculation(
+    calc: CalculationCreate,
+    db: Session = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
+):
     try:
-        calculation = Calculation.create(db, calc.model_dump())
+        calculation = Calculation.create(db, calc.model_dump(), user_id=current_user.id)
         db.commit()
         db.refresh(calculation)
         return calculation
@@ -133,8 +148,16 @@ def create_calculation(calc: CalculationCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
 @app.put("/calculations/{calculation_id}", response_model=CalculationRead)
-def update_calculation(calculation_id: str, calc: CalculationCreate, db: Session = Depends(get_db)):
-    calculation = db.get(Calculation, calculation_id)
+def update_calculation(
+    calculation_id: str,
+    calc: CalculationCreate,
+    db: Session = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    calculation = db.query(Calculation).filter(
+        Calculation.id == calculation_id,
+        Calculation.user_id == current_user.id
+    ).first()
     if not calculation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Calculation not found")
 
@@ -150,8 +173,15 @@ def update_calculation(calculation_id: str, calc: CalculationCreate, db: Session
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
 @app.delete("/calculations/{calculation_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_calculation(calculation_id: str, db: Session = Depends(get_db)):
-    calculation = db.get(Calculation, calculation_id)
+def delete_calculation(
+    calculation_id: str,
+    db: Session = Depends(get_db),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    calculation = db.query(Calculation).filter(
+        Calculation.id == calculation_id,
+        Calculation.user_id == current_user.id
+    ).first()
     if not calculation:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Calculation not found")
     db.delete(calculation)

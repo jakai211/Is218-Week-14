@@ -11,7 +11,6 @@ from contextlib import contextmanager
 import pytest
 import requests
 from faker import Faker
-from playwright.sync_api import sync_playwright, Browser, Page
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
@@ -216,8 +215,9 @@ def seed_users(db_session: Session, request) -> List[User]:
 def fastapi_server():
     """
     Start and manage a FastAPI test server, if needed for integration tests.
+    Returns the server URL for HTTP-based tests.
     """
-    server_url = 'http://127.0.0.1:8000/'
+    server_url = 'http://127.0.0.1:8000'
     logger.info("Starting test server...")
 
     try:
@@ -227,11 +227,11 @@ def fastapi_server():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        if not wait_for_server(server_url, timeout=30):
+        if not wait_for_server(server_url + '/', timeout=30):
             raise ServerStartupError("Failed to start test server")
 
         logger.info("Test server started successfully.")
-        yield  # Run all tests that depend on this fixture
+        yield server_url  # Run all tests that depend on this fixture, passing the URL
 
     except Exception as e:
         logger.error(f"Server error: {str(e)}")
@@ -246,43 +246,7 @@ def fastapi_server():
             logger.warning("Test server did not terminate in time; killing it.")
             process.kill()
 
-# ======================================================================================
-# Browser and Page Fixtures (Optional)
-# ======================================================================================
-@pytest.fixture(scope="session")
-def browser_context():
-    """
-    Provide a Playwright browser context for UI tests.
-    """
-    with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(
-            headless=True,
-            args=['--no-sandbox', '--disable-dev-shm-usage']
-        )
-        logger.info("Playwright browser launched.")
-        try:
-            yield browser
-        finally:
-            logger.info("Closing Playwright browser.")
-            browser.close()
 
-@pytest.fixture
-def page(browser_context: Browser):
-    """
-    Provide a new browser page for each test.
-    """
-    context = browser_context.new_context(
-        viewport={'width': 1920, 'height': 1080},
-        ignore_https_errors=True
-    )
-    page = context.new_page()
-    logger.info("Created new browser page.")
-    try:
-        yield page
-    finally:
-        logger.info("Closing browser page and context.")
-        page.close()
-        context.close()
 
 # ======================================================================================
 # Pytest Command-Line Options and Test Collection

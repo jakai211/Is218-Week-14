@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from sqlalchemy import Column, Float, String
+from sqlalchemy import Column, Float, String, ForeignKey
 
 from app.database import Base
 from app.schemas.calculation import CalculationCreate, CalculationType
@@ -28,6 +28,7 @@ class Calculation(Base):
     __tablename__ = "calculations"
 
     id = Column(String(36), primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     a = Column(Float, nullable=False)
     b = Column(Float, nullable=False)
     type = Column(String(20), nullable=False)
@@ -51,10 +52,10 @@ class Calculation(Base):
         return CalculationFactory.compute(a, b, CalculationType(calc_type))
 
     @classmethod
-    def create(cls, db, data: Dict[str, Any]) -> "Calculation":
+    def create(cls, db, data: Dict[str, Any], user_id: str) -> "Calculation":
         schema = CalculationCreate.model_validate(data)
         result = CalculationFactory.compute(schema.a, schema.b, schema.type)
-        calculation = cls(a=schema.a, b=schema.b, type=schema.type.value, result=result)
+        calculation = cls(a=schema.a, b=schema.b, type=schema.type.value, result=result, user_id=user_id)
         db.add(calculation)
         db.flush()
         return calculation
