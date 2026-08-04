@@ -198,18 +198,53 @@ docker run -it --rm <image-name>
 
 # 🚀 6. Running the Project
 
-- **Without Docker**:
+## Run locally
 
-```bash
+1. Activate the virtual environment:
+
+```powershell
+venv\Scripts\activate
+```
+
+2. Install dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+3. Start the app:
+
+```powershell
 python main.py
 ```
 
-(or update this if the main script is different.)
+4. Open the OpenAPI docs:
 
-- **With Docker**:
+- http://127.0.0.1:8000/docs
+- http://127.0.0.1:8000/redoc
 
-```bash
-docker run -it --rm <image-name>
+## API endpoints
+
+- `POST /users/register`
+- `POST /users/login`
+- `GET /calculations`
+- `GET /calculations/{id}`
+- `POST /calculations`
+- `PUT /calculations/{id}`
+- `DELETE /calculations/{id}`
+
+## Run tests
+
+- Run all core tests (excludes E2E):
+
+```powershell
+python -m pytest -q
+```
+
+- Run the new API integration tests only:
+
+```powershell
+python -m pytest tests/integration/test_api_endpoints.py -q
 ```
 
 ---
@@ -220,7 +255,7 @@ After finishing your work:
 
 ```bash
 git add .
-git commit -m "Complete Module X"
+git commit -m "Complete Module 10 API and tests"
 git push origin main
 ```
 
