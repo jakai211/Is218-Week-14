@@ -1,6 +1,7 @@
 # tests/e2e/test_e2e.py
 
 import pytest  # Import the pytest framework for writing and running tests
+import uuid
 
 # The following decorators and functions define E2E tests for the FastAPI calculator application.
 
@@ -71,3 +72,28 @@ def test_calculator_divide_by_zero(page, fastapi_server):
     # "Error: Cannot divide by zero!". This verifies that the application handles division by zero
     # gracefully and displays the correct error message to the user.
     assert page.inner_text('#result') == 'Error: Cannot divide by zero!'
+
+
+@pytest.mark.e2e
+def test_register_and_login_pages(page, fastapi_server):
+    # Register page should render and accept a new user registration.
+    page.goto('http://localhost:8000/register')
+    assert page.inner_text('h1') == 'Register'
+
+    page.fill('#username', 'ui-test-user')
+    page.fill('#email', 'ui-test-user@example.com')
+    page.fill('#password', 'TestPass123')
+    page.fill('#confirm_password', 'TestPass123')
+    page.click('button:text("Register")')
+
+    assert page.locator('#message').inner_text().strip() == 'Registration successful.'
+
+    # Login page should render and accept the same credentials.
+    page.goto('http://localhost:8000/login')
+    assert page.inner_text('h1') == 'Login'
+
+    page.fill('#username', 'ui-test-user')
+    page.fill('#password', 'TestPass123')
+    page.click('button:text("Login")')
+
+    assert page.locator('#message').inner_text().strip() == 'Login successful.'

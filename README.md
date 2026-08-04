@@ -223,6 +223,12 @@ python main.py
 - http://127.0.0.1:8000/docs
 - http://127.0.0.1:8000/redoc
 
+5. Open the app pages:
+
+- http://127.0.0.1:8000/
+- http://127.0.0.1:8000/register
+- http://127.0.0.1:8000/login
+
 ## API endpoints
 
 - `POST /users/register`
@@ -245,6 +251,18 @@ python -m pytest -q
 
 ```powershell
 python -m pytest tests/integration/test_api_endpoints.py -q
+```
+
+- Install Playwright browser dependencies before running E2E tests:
+
+```powershell
+python -m playwright install chromium
+```
+
+- Run the end-to-end browser tests:
+
+```powershell
+python -m pytest tests/e2e -m e2e -q
 ```
 
 ---
