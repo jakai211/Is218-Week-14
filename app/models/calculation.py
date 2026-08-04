@@ -21,6 +21,12 @@ class CalculationFactory:
             if b == 0:
                 raise ValueError("Cannot divide by zero")
             return a / b
+        if calc_type == CalculationType.modulus:
+            if b == 0:
+                raise ValueError("Cannot compute modulus with zero divisor")
+            return a % b
+        if calc_type == CalculationType.power:
+            return a ** b
         raise ValueError("Invalid calculation type")
 
 

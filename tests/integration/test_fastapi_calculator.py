@@ -152,3 +152,47 @@ def test_divide_by_zero_api(client):
     # Assert that the 'error' field contains the correct error message
     assert "Cannot divide by zero!" in response.json()['error'], \
         f"Expected error message 'Cannot divide by zero!', got '{response.json()['error']}'"
+
+
+# ---------------------------------------------
+# Integration Tests for Modulus endpoint
+# ---------------------------------------------
+
+def test_modulus_api(client):
+    """Test the /modulus endpoint returns the correct remainder."""
+    response = client.post('/modulus', json={'a': 10, 'b': 3})
+    assert response.status_code == 200
+    assert response.json()['result'] == pytest.approx(1)
+
+
+def test_modulus_by_zero_api(client):
+    """Test that /modulus returns 400 when divisor is zero."""
+    response = client.post('/modulus', json={'a': 10, 'b': 0})
+    assert response.status_code == 400
+    assert 'error' in response.json()
+    assert "zero" in response.json()['error'].lower()
+
+
+# ---------------------------------------------
+# Integration Tests for Power endpoint
+# ---------------------------------------------
+
+def test_power_api(client):
+    """Test the /power endpoint returns the correct result."""
+    response = client.post('/power', json={'a': 2, 'b': 3})
+    assert response.status_code == 200
+    assert response.json()['result'] == pytest.approx(8)
+
+
+def test_power_zero_exponent_api(client):
+    """Test the /power endpoint with zero exponent returns 1."""
+    response = client.post('/power', json={'a': 5, 'b': 0})
+    assert response.status_code == 200
+    assert response.json()['result'] == pytest.approx(1)
+
+
+def test_power_fractional_exponent_api(client):
+    """Test the /power endpoint with a fractional exponent (square root)."""
+    response = client.post('/power', json={'a': 4, 'b': 0.5})
+    assert response.status_code == 200
+    assert response.json()['result'] == pytest.approx(2.0)

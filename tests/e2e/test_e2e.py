@@ -314,3 +314,68 @@ def test_missing_calculation_fields(base_url):
     response = requests.post(f"{base_url}/calculations", json=payload, headers=headers)
     assert response.status_code == 422
 
+
+# ---------------------------------------------------------------------------
+# New Feature: Modulus and Power Operations
+# ---------------------------------------------------------------------------
+
+@pytest.mark.e2e
+def test_calculator_modulus(base_url):
+    """Test modulus operation via quick calculator endpoint."""
+    response = requests.post(f"{base_url}/modulus", json={"a": 10, "b": 3})
+    assert response.status_code == 200
+    assert response.json()["result"] == pytest.approx(1)
+
+
+@pytest.mark.e2e
+def test_calculator_modulus_by_zero(base_url):
+    """Test modulus by zero returns an error."""
+    response = requests.post(f"{base_url}/modulus", json={"a": 10, "b": 0})
+    assert response.status_code == 400
+
+
+@pytest.mark.e2e
+def test_calculator_power(base_url):
+    """Test exponentiation via quick calculator endpoint."""
+    response = requests.post(f"{base_url}/power", json={"a": 2, "b": 10})
+    assert response.status_code == 200
+    assert response.json()["result"] == pytest.approx(1024)
+
+
+@pytest.mark.e2e
+def test_bread_modulus_calculation(base_url):
+    """Test saving a modulus calculation via BREAD endpoint."""
+    user_data = {
+        "username": f"mod_{uuid4()}",
+        "email": f"mod_{uuid4()}@example.com",
+        "password": "TestPass123"
+    }
+    token = register_and_login(base_url, user_data)["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {"a": 17, "b": 5, "type": "modulus"}
+    response = requests.post(f"{base_url}/calculations", json=payload, headers=headers)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["result"] == pytest.approx(2)
+    assert data["type"] == "modulus"
+
+
+@pytest.mark.e2e
+def test_bread_power_calculation(base_url):
+    """Test saving a power calculation via BREAD endpoint."""
+    user_data = {
+        "username": f"pow_{uuid4()}",
+        "email": f"pow_{uuid4()}@example.com",
+        "password": "TestPass123"
+    }
+    token = register_and_login(base_url, user_data)["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    payload = {"a": 3, "b": 4, "type": "power"}
+    response = requests.post(f"{base_url}/calculations", json=payload, headers=headers)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["result"] == pytest.approx(81)
+    assert data["type"] == "power"
+

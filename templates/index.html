@@ -140,6 +140,8 @@
         <button onclick="calculate('subtract')">Subtract</button>
         <button onclick="calculate('multiply')">Multiply</button>
         <button onclick="calculate('divide')">Divide</button>
+        <button onclick="calculate('modulus')">Modulus (%)</button>
+        <button onclick="calculate('power')">Power (^)</button>
         <div class="result" id="result"></div>
     </div>
     
@@ -159,10 +161,12 @@
         <div class="form-group">
             <label for="calc-type">Operation:</label>
             <select id="calc-type">
-                <option value="add">Add</option>
-                <option value="subtract">Subtract</option>
-                <option value="multiply">Multiply</option>
-                <option value="divide">Divide</option>
+                <option value="add">Add (+)</option>
+                <option value="subtract">Subtract (-)</option>
+                <option value="multiply">Multiply (×)</option>
+                <option value="divide">Divide (÷)</option>
+                <option value="modulus">Modulus (%)</option>
+                <option value="power">Power (^)</option>
             </select>
         </div>
         
@@ -307,7 +311,9 @@
                 'add': '+',
                 'subtract': '-',
                 'multiply': '×',
-                'divide': '÷'
+                'divide': '÷',
+                'modulus': '%',
+                'power': '^'
             };
             return symbols[type] || type;
         }

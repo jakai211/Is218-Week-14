@@ -118,3 +118,36 @@ def divide(a: Number, b: Number) -> float:
     # Perform division of a by b and return the result as a float
     result = a / b
     return result
+
+
+def modulus(a: Number, b: Number) -> float:
+    """
+    Return the remainder of a divided by b.
+
+    Raises:
+    - ValueError: If b is zero.
+
+    Example:
+    >>> modulus(10, 3)
+    1
+    >>> modulus(10, 0)
+    Traceback (most recent call last):
+        ...
+    ValueError: Cannot compute modulus with zero divisor!
+    """
+    if b == 0:
+        raise ValueError("Cannot compute modulus with zero divisor!")
+    return a % b
+
+
+def power(a: Number, b: Number) -> float:
+    """
+    Raise a to the power of b and return the result.
+
+    Example:
+    >>> power(2, 3)
+    8
+    >>> power(5, 0)
+    1
+    """
+    return a ** b

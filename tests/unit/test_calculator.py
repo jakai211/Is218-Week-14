@@ -2,7 +2,7 @@
 
 import pytest  # Import the pytest framework for writing and running tests
 from typing import Union  # Import Union for type hinting multiple possible types
-from app.operations import add, subtract, multiply, divide  # Import the calculator functions from the operations module
+from app.operations import add, subtract, multiply, divide, modulus, power
 
 # Define a type alias for numbers that can be either int or float
 Number = Union[int, float]
@@ -232,3 +232,61 @@ def test_divide_by_zero() -> None:
     # Assert that the exception message contains the expected error message
     assert "Cannot divide by zero!" in str(excinfo.value), \
         f"Expected error message 'Cannot divide by zero!', but got '{excinfo.value}'"
+
+
+# ---------------------------------------------
+# Unit Tests for the 'modulus' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (10, 3, 1),
+        (10, 5, 0),
+        (7, 4, 3),
+        (-10, 3, 2),    # Python modulus follows divisor sign
+        (10.5, 3, 1.5),
+    ],
+    ids=[
+        "modulus_positive_remainder",
+        "modulus_zero_remainder",
+        "modulus_odd_divisor",
+        "modulus_negative_dividend",
+        "modulus_float",
+    ]
+)
+def test_modulus(a: Number, b: Number, expected: float) -> None:
+    result = modulus(a, b)
+    assert result == pytest.approx(expected), f"Expected modulus({a}, {b}) = {expected}, got {result}"
+
+
+def test_modulus_by_zero() -> None:
+    with pytest.raises(ValueError) as excinfo:
+        modulus(10, 0)
+    assert "Cannot compute modulus with zero divisor!" in str(excinfo.value)
+
+
+# ---------------------------------------------
+# Unit Tests for the 'power' Function
+# ---------------------------------------------
+
+@pytest.mark.parametrize(
+    "a, b, expected",
+    [
+        (2, 3, 8),
+        (5, 0, 1),
+        (3, 2, 9),
+        (2, -1, 0.5),
+        (4, 0.5, 2.0),
+    ],
+    ids=[
+        "power_integer_exponent",
+        "power_zero_exponent",
+        "power_square",
+        "power_negative_exponent",
+        "power_fractional_exponent",
+    ]
+)
+def test_power(a: Number, b: Number, expected: float) -> None:
+    result = power(a, b)
+    assert result == pytest.approx(expected), f"Expected power({a}, {b}) = {expected}, got {result}"

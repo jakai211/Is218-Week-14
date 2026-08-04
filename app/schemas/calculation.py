@@ -8,6 +8,8 @@ class CalculationType(str, Enum):
     subtract = "subtract"
     multiply = "multiply"
     divide = "divide"
+    modulus = "modulus"
+    power = "power"
 
     @classmethod
     def _missing_(cls, value):
@@ -21,6 +23,10 @@ class CalculationType(str, Enum):
                 return cls.multiply
             if normalized in {"divide", "div", "division"}:
                 return cls.divide
+            if normalized in {"modulus", "mod", "remainder"}:
+                return cls.modulus
+            if normalized in {"power", "pow", "exponent", "exponentiation"}:
+                return cls.power
         return super()._missing_(value)
 
 
@@ -35,6 +41,8 @@ class CalculationCreate(BaseModel):
     def validate_division(cls, values):
         if values.type == CalculationType.divide and values.b == 0:
             raise ValueError("Division by zero is not allowed")
+        if values.type == CalculationType.modulus and values.b == 0:
+            raise ValueError("Modulus by zero is not allowed")
         return values
 
 

@@ -16,7 +16,7 @@ from app.models.user import User
 from app.schemas.base import UserCreate
 from app.schemas.calculation import CalculationCreate, CalculationRead
 from app.schemas.user import Token, UserLogin, UserResponse
-from app.operations import add, divide, multiply, subtract
+from app.operations import add, divide, multiply, subtract, modulus, power
 from app.auth.dependencies import get_current_user
 import logging
 import uvicorn
@@ -77,6 +77,10 @@ async def read_root(request: Request):
         name="index.html",
         context={"request": request},
     )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 @app.get("/register")
 async def register_page(request: Request):
@@ -226,6 +230,27 @@ async def divide_route(operation: OperationRequest):
     except Exception as e:
         logger.error(f"Divide Operation Internal Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.post("/modulus", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def modulus_route(operation: OperationRequest):
+    try:
+        result = modulus(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except ValueError as e:
+        logger.error(f"Modulus Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Modulus Operation Internal Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+@app.post("/power", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
+async def power_route(operation: OperationRequest):
+    try:
+        result = power(operation.a, operation.b)
+        return OperationResponse(result=result)
+    except Exception as e:
+        logger.error(f"Power Operation Error: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=8000)
