@@ -1,28 +1,38 @@
+from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from datetime import datetime
-from pydantic import BaseModel, EmailStr, ConfigDict
 
-class UserResponse(BaseModel):
-    """Schema for user response data"""
-    id: UUID
+from pydantic import BaseModel, ConfigDict, EmailStr
+
+
+class UserRead(BaseModel):
+    """Schema for user response data without exposing the password hash."""
+
+    id: UUID | None = None
     username: str
     email: EmailStr
-    first_name: str
-    last_name: str
-    is_active: bool
-    is_verified: bool
-    created_at: datetime
-    updated_at: datetime
+    first_name: str = ""
+    last_name: str = ""
+    is_active: bool = True
+    is_verified: bool = False
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
-    model_config = ConfigDict(from_attributes=True)  # Enable mapping from ORM objects
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserResponse(UserRead):
+    """Backward-compatible alias used by the auth dependency layer."""
+
+    pass
 
 
 class Token(BaseModel):
-    """Schema for authentication token response"""
+    """Schema for authentication token response."""
+
     access_token: str
     token_type: str = "bearer"
-    user: UserResponse
+    user: UserRead
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -46,12 +56,14 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    """Schema for JWT token payload"""
+    """Schema for JWT token payload."""
+
     user_id: Optional[UUID] = None
 
 
 class UserLogin(BaseModel):
-    """Schema for user login"""
+    """Schema for user login."""
+
     username: str
     password: str
 

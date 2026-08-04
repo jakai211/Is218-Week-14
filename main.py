@@ -1,13 +1,16 @@
 # main.py
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, field_validator  # Use @validator for Pydantic 1.x
-from fastapi.exceptions import RequestValidationError
-from app.operations import add, subtract, multiply, divide  # Ensure correct import path
-import uvicorn
+
+from app.operations import add, divide, multiply, subtract  # Ensure correct import path
 import logging
+import uvicorn
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -16,7 +19,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # Setup templates directory
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 
 # Pydantic model for request data
 class OperationRequest(BaseModel):
@@ -61,7 +64,11 @@ async def read_root(request: Request):
     """
     Serve the index.html template.
     """
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"request": request},
+    )
 
 @app.post("/add", response_model=OperationResponse, responses={400: {"model": ErrorResponse}})
 async def add_route(operation: OperationRequest):

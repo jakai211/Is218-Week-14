@@ -248,6 +248,23 @@ Then submit the GitHub repository link as instructed.
 
 # 📋 Notes
 
+## Module 10 User Model and Auth Notes
+
+This project now includes a SQLAlchemy user model with unique username/email constraints, password hashing and verification helpers, Pydantic create/read schemas, and targeted unit/integration tests.
+
+### Run tests locally
+
+```bash
+pytest tests/unit tests/integration
+```
+
+### Docker image
+
+The CI workflow is configured to build and push a Docker image to Docker Hub after the test job succeeds. Configure the repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`, then the image will be published to:
+
+- https://hub.docker.com/r/<your-dockerhub-username>/module10_is601
+
+
 - Install **Homebrew** first on Mac.
 - Install and configure **Git** and **SSH** before cloning.
 - Use **Python 3.10+** and **virtual environments** for Python projects.
