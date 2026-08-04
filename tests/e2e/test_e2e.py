@@ -35,16 +35,15 @@ def test_calculator_add(page, fastapi_server):
     
     # Fill in the first number input field (with id 'a') with the value '10'.
     page.fill('#a', '10')
-    
-    # Fill in the second number input field (with id 'b') with the value '5'.
     page.fill('#b', '5')
-    
-    # Click the button that has the exact text "Add". This triggers the addition operation.
-    page.click('button:text("Add")')
-    
-    # Use an assertion to check that the text within the result div (with id 'result') is exactly "Result: 15".
-    # This verifies that the addition operation was performed correctly and the result is displayed as expected.
-    assert page.inner_text('#result') == 'Result: 15'
+
+    with page.expect_response('**/add') as add_response:
+        page.click('button:has-text("Add")')
+    response = add_response.value
+    assert response.status == 200
+
+    page.wait_for_function("document.querySelector('#result').innerText.length > 0")
+    assert page.inner_text('#result').strip() == 'Result: 15'
 
 @pytest.mark.e2e
 def test_calculator_divide_by_zero(page, fastapi_server):
@@ -61,17 +60,15 @@ def test_calculator_divide_by_zero(page, fastapi_server):
     
     # Fill in the first number input field (with id 'a') with the value '10'.
     page.fill('#a', '10')
-    
-    # Fill in the second number input field (with id 'b') with the value '0', attempting to divide by zero.
     page.fill('#b', '0')
-    
-    # Click the button that has the exact text "Divide". This triggers the division operation.
-    page.click('button:text("Divide")')
-    
-    # Use an assertion to check that the text within the result div (with id 'result') is exactly
-    # "Error: Cannot divide by zero!". This verifies that the application handles division by zero
-    # gracefully and displays the correct error message to the user.
-    assert page.inner_text('#result') == 'Error: Cannot divide by zero!'
+
+    with page.expect_response('**/divide') as divide_response:
+        page.click('button:has-text("Divide")')
+    response = divide_response.value
+    assert response.status == 400
+
+    page.wait_for_function("document.querySelector('#result').innerText.length > 0")
+    assert page.inner_text('#result').strip() == 'Error: Cannot divide by zero!'
 
 
 @pytest.mark.e2e
@@ -84,8 +81,13 @@ def test_register_and_login_pages(page, fastapi_server):
     page.fill('#email', 'ui-test-user@example.com')
     page.fill('#password', 'TestPass123')
     page.fill('#confirm_password', 'TestPass123')
-    page.click('button:text("Register")')
 
+    with page.expect_response('**/users/register') as register_response:
+        page.click('button:has-text("Register")')
+    response = register_response.value
+    assert response.status == 201
+
+    page.wait_for_function("document.querySelector('#message').innerText.length > 0")
     assert page.locator('#message').inner_text().strip() == 'Registration successful.'
 
     # Login page should render and accept the same credentials.
@@ -94,6 +96,11 @@ def test_register_and_login_pages(page, fastapi_server):
 
     page.fill('#username', 'ui-test-user')
     page.fill('#password', 'TestPass123')
-    page.click('button:text("Login")')
 
+    with page.expect_response('**/users/login') as login_response:
+        page.click('button:has-text("Login")')
+    response = login_response.value
+    assert response.status == 200
+
+    page.wait_for_function("document.querySelector('#message').innerText.length > 0")
     assert page.locator('#message').inner_text().strip() == 'Login successful.'

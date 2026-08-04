@@ -1,8 +1,10 @@
 # tests/conftest.py
 
 import subprocess
+import sys
 import time
 import logging
+from pathlib import Path
 from typing import Generator, Dict, List
 from contextlib import contextmanager
 
@@ -219,8 +221,9 @@ def fastapi_server():
     logger.info("Starting test server...")
 
     try:
+        cmd = [sys.executable, str(Path(__file__).resolve().parent.parent / 'main.py')]
         process = subprocess.Popen(
-            ['python', 'main.py'],
+            cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
