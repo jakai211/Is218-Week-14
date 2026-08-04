@@ -1,5 +1,5 @@
 # app/schemas/__init__.py
-
+from .calculation import CalculationCreate, CalculationRead
 from .base import PasswordMixin, UserBase, UserCreate, UserLogin
 from .user import Token, TokenData, UserRead, UserResponse
 
@@ -12,4 +12,6 @@ __all__ = [
     "UserResponse",
     "Token",
     "TokenData",
+    "CalculationCreate",
+    "CalculationRead",
 ]
